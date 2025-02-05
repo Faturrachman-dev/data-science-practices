@@ -2,12 +2,16 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
 
 # Load data
 @st.cache_data
 def load_data():
-    # Changed path to local dashboard folder
-    df = pd.read_csv("PRSA_Data_Aotizhongxin_20130301-20170228.csv")
+    # Get the absolute path to the data file
+    current_dir = os.path.dirname(__file__)
+    data_path = os.path.join(current_dir, "PRSA_Data_Aotizhongxin_20130301-20170228.csv")
+    
+    df = pd.read_csv(data_path)
     df['datetime'] = pd.to_datetime(df[['year', 'month', 'day', 'hour']])
     
     # Add season column
