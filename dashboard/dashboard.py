@@ -34,29 +34,37 @@ def main():
     
     df = load_data()
 
-    # Add more interactive features
+    # Add interactive features
     st.sidebar.header('Filters')
     
-    # 1. Date Range Filter (already exists)
+    # 1. Date Range Filter
     date_range = st.sidebar.date_input(
         "Select Date Range",
         [df['datetime'].min().date(), df['datetime'].max().date()]
     )
     
-    # 2. Season Filter (already exists)
+    # 2. Season Filter
     selected_season = st.sidebar.multiselect(
         'Select Seasons',
         options=df['season'].unique(),
         default=df['season'].unique()
     )
     
-    # 3. Add Station Filter (new)
+    # 3. Pollutant Filter (Add this before using selected_pollutants)
+    pollutants = ['PM2.5', 'PM10', 'SO2', 'NO2']
+    selected_pollutants = st.sidebar.multiselect(
+        'Select Pollutants',
+        options=pollutants,
+        default=pollutants
+    )
+    
+    # 4. Station Filter
     selected_station = st.sidebar.selectbox(
         'Select Station',
         options=['All'] + list(df['station'].unique())
     )
     
-    # 4. Add Hour Range Slider (new)
+    # 5. Hour Range Slider
     hour_range = st.sidebar.slider(
         'Select Hour Range',
         0, 23, (0, 23)
