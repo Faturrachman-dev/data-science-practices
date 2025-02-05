@@ -25,3 +25,12 @@ __pycache__/
 # System
 .DS_Store
 Thumbs.db 
+
+# Others
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+*.bz2
+*.wim
