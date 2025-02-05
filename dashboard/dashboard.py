@@ -34,9 +34,50 @@ def main():
     
     df = load_data()
 
+    # Add more interactive features
+    st.sidebar.header('Filters')
+    
+    # 1. Date Range Filter (already exists)
+    date_range = st.sidebar.date_input(
+        "Select Date Range",
+        [df['datetime'].min().date(), df['datetime'].max().date()]
+    )
+    
+    # 2. Season Filter (already exists)
+    selected_season = st.sidebar.multiselect(
+        'Select Seasons',
+        options=df['season'].unique(),
+        default=df['season'].unique()
+    )
+    
+    # 3. Add Station Filter (new)
+    selected_station = st.sidebar.selectbox(
+        'Select Station',
+        options=['All'] + list(df['station'].unique())
+    )
+    
+    # 4. Add Hour Range Slider (new)
+    hour_range = st.sidebar.slider(
+        'Select Hour Range',
+        0, 23, (0, 23)
+    )
+
+    # Update filter logic
+    mask = (
+        (df['datetime'].dt.date >= date_range[0]) & 
+        (df['datetime'].dt.date <= date_range[1]) & 
+        (df['season'].isin(selected_season)) &
+        (df['hour'].between(hour_range[0], hour_range[1]))
+    )
+    
+    if selected_station != 'All':
+        mask = mask & (df['station'] == selected_station)
+        
+    filtered_df = df[mask]
+
     # Seasonal Analysis
     st.header('Seasonal Pollution Patterns')
-    seasonal_pollution = df.groupby('season')[['PM2.5', 'PM10', 'SO2', 'NO2']].mean()
+    seasonal_pollution = filtered_df.groupby('season')[selected_pollutants].mean()
 
     fig1, ax1 = plt.subplots(figsize=(12, 6))
     seasonal_pollution.plot(kind='bar', ax=ax1)
@@ -49,8 +90,14 @@ def main():
 
     # Weather Correlation
     st.header('Weather and PM2.5 Correlation')
-    weather_columns = ['TEMP', 'PRES', 'WSPM', 'PM2.5']
-    correlations = df[weather_columns].corr()
+    weather_vars = st.multiselect(
+        'Select Weather Variables',
+        ['TEMP', 'PRES', 'WSPM'],
+        default=['TEMP', 'PRES', 'WSPM']
+    )
+    
+    weather_columns = weather_vars + ['PM2.5']
+    correlations = filtered_df[weather_columns].corr()
 
     fig2, ax2 = plt.subplots(figsize=(10, 6))
     sns.heatmap(correlations, annot=True, cmap='coolwarm', center=0, ax=ax2)

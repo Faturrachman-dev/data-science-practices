@@ -1,6 +1,7 @@
 # Core packages
 pandas==2.2.0
 numpy==1.26.0
+ipykernel==6.26.0
 
 # Visualization
 matplotlib==3.8.0
