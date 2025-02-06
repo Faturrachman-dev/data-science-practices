@@ -17,56 +17,56 @@ def load_data():
     # Add season column
     def get_season(month):
         if month in [12, 1, 2]:
-            return 'Winter'
+            return 'Musim Dingin'
         elif month in [3, 4, 5]:
-            return 'Spring'
+            return 'Musim Semi'
         elif month in [6, 7, 8]:
-            return 'Summer'
+            return 'Musim Panas'
         else:
-            return 'Fall'
+            return 'Musim Gugur'
     
     # Add the season column
     df['season'] = df['month'].apply(get_season)
     return df
 
 def main():
-    st.title('Beijing Air Quality Analysis Dashboard')
+    st.title('Dashboard Analysis Kualitas Udara Beijing')
     
     df = load_data()
 
     # Add interactive features
-    st.sidebar.header('Filters')
+    st.sidebar.header('Filter Data')
     
     # 1. Date Range Filter
     date_range = st.sidebar.date_input(
-        "Select Date Range",
+        "Pilih Rentang Tanggal",
         [df['datetime'].min().date(), df['datetime'].max().date()]
     )
     
     # 2. Season Filter
     selected_season = st.sidebar.multiselect(
-        'Select Seasons',
+        'Pilih Musim',
         options=df['season'].unique(),
         default=df['season'].unique()
     )
     
-    # 3. Pollutant Filter (Add this before using selected_pollutants)
+    # 3. Pollutant Filter
     pollutants = ['PM2.5', 'PM10', 'SO2', 'NO2']
     selected_pollutants = st.sidebar.multiselect(
-        'Select Pollutants',
+        'Pilih Jenis Polutan',
         options=pollutants,
         default=pollutants
     )
     
     # 4. Station Filter
     selected_station = st.sidebar.selectbox(
-        'Select Station',
-        options=['All'] + list(df['station'].unique())
+        'Pilih Stasiun',
+        options=['Semua'] + list(df['station'].unique())
     )
     
     # 5. Hour Range Slider
     hour_range = st.sidebar.slider(
-        'Select Hour Range',
+        'Pilih Rentang Jam',
         0, 23, (0, 23)
     )
 
@@ -78,38 +78,44 @@ def main():
         (df['hour'].between(hour_range[0], hour_range[1]))
     )
     
-    if selected_station != 'All':
+    if selected_station != 'Semua':
         mask = mask & (df['station'] == selected_station)
         
     filtered_df = df[mask]
 
     # Seasonal Analysis
-    st.header('Seasonal Pollution Patterns')
+    st.header('Pola Polusi Berdasarkan Musim')
     seasonal_pollution = filtered_df.groupby('season')[selected_pollutants].mean()
 
     fig1, ax1 = plt.subplots(figsize=(12, 6))
     seasonal_pollution.plot(kind='bar', ax=ax1)
-    plt.title('Average Pollutant Levels by Season')
-    plt.xlabel('Season')
-    plt.ylabel('Concentration')
-    plt.legend(title='Pollutants')
+    plt.title('Rata-rata Tingkat Polutan per Musim')
+    plt.xlabel('Musim')
+    plt.ylabel('Konsentrasi (μg/m³)')
+    plt.legend(title='Jenis Polutan')
     plt.xticks(rotation=45)
     st.pyplot(fig1)
 
     # Weather Correlation
-    st.header('Weather and PM2.5 Correlation')
+    st.header('Korelasi Cuaca dengan PM2.5')
     weather_vars = st.multiselect(
-        'Select Weather Variables',
-        ['TEMP', 'PRES', 'WSPM'],
-        default=['TEMP', 'PRES', 'WSPM']
+        'Pilih Variabel Cuaca',
+        ['TEMP (Suhu)', 'PRES (Tekanan)', 'WSPM (Kec. Angin)'],
+        default=['TEMP (Suhu)', 'PRES (Tekanan)', 'WSPM (Kec. Angin)']
     )
     
-    weather_columns = weather_vars + ['PM2.5']
+    # Convert display names back to column names
+    weather_map = {
+        'TEMP (Suhu)': 'TEMP',
+        'PRES (Tekanan)': 'PRES',
+        'WSPM (Kec. Angin)': 'WSPM'
+    }
+    weather_columns = [weather_map[var] for var in weather_vars] + ['PM2.5']
     correlations = filtered_df[weather_columns].corr()
 
     fig2, ax2 = plt.subplots(figsize=(10, 6))
     sns.heatmap(correlations, annot=True, cmap='coolwarm', center=0, ax=ax2)
-    plt.title('Correlation between Weather Conditions and PM2.5')
+    plt.title('Korelasi antara Kondisi Cuaca dan PM2.5')
     st.pyplot(fig2)
 
 if __name__ == "__main__":
