@@ -35,4 +35,9 @@ The dashboard uses hourly air quality data from Beijing (2013-2017), including:
 2. Observe:
    - How pollutant levels vary by season
    - Weather correlations with PM2.5
-   - Temporal patterns in air quality 
+   - Temporal patterns in air quality
+
+3. Deployment:
+   - App URL: https://faturrachman-dev-data-science-practic-dashboarddashboard-iaiz0b.streamlit.app/
+   - Automatically updates with GitHub changes
+   - Hosted on Streamlit Cloud 
